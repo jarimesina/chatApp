@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
@@ -63,14 +63,10 @@ function SignOut() {
 
 function ChatMessage(props) {
   const { text, uid, photoUrl } = props.message;
-
-  console.log("props", props);
-  console.log("uid", uid);
   const auth = firebase.auth();
 
   const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
 
-  console.log(messageClass);
   return (
     <div className={`message ${messageClass}`}>
       <img src={photoUrl} />
@@ -80,6 +76,7 @@ function ChatMessage(props) {
 }
 
 function ChatRoom() {
+  const dummy = useRef();
   const app = firebase.initializeApp({
     apiKey: "AIzaSyA_vDOn8vlG3lzQ0a_QOziAhREv1dzRBmk",
     authDomain: "superchat-a7cc9.firebaseapp.com",
@@ -89,17 +86,6 @@ function ChatRoom() {
     appId: "1:834483305054:web:dcb61ac344252f442e52cf",
     measurementId: "G-YRJ238K9ZQ",
   });
-
-  // const db = getFirestore(app);
-
-  // const q = query(collection(db, "messages"));
-  // const unsubscribe = onSnapshot(q, (querySnapshot) => {
-  //   const cities = [];
-  //   querySnapshot.forEach((doc) => {
-  //     cities.push(doc.data().name);
-  //   });
-  //   console.log("Current cities in CA: ", cities.join(", "));
-  // });
 
   const [value, loading, error] = useCollection(
     collection(getFirestore(app), "messages"),
@@ -115,7 +101,6 @@ function ChatRoom() {
     const auth = getAuth();
     const user = auth.currentUser;
 
-    console.log("user", user.photoURL);
     const docData = {
       text: formValue,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -124,16 +109,19 @@ function ChatRoom() {
     };
     await addDoc(collection(getFirestore(app), "messages"), docData);
     setFormValue("");
+    dummy.current.scrollIntoView({ behavior: "smooth" });
   };
 
-  console.log("value", value);
   return (
     <>
       <main>
         {value &&
-          value.docs.map((msg, index) => (
-            <ChatMessage key={msg.id} uid={msg.id} message={msg.data()} />
-          ))}
+          value.docs
+            .reverse()
+            .map((msg, index) => (
+              <ChatMessage key={msg.id} uid={msg.id} message={msg.data()} />
+            ))}
+        <div ref={dummy}></div>
       </main>
 
       <form onSubmit={sendMessage}>
