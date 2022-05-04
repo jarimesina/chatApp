@@ -116,11 +116,9 @@ function ChatRoom() {
     <>
       <main>
         {value &&
-          value.docs
-            .reverse()
-            .map((msg, index) => (
-              <ChatMessage key={msg.id} uid={msg.id} message={msg.data()} />
-            ))}
+          value.docs.map((msg, index) => (
+            <ChatMessage key={msg.id} uid={msg.id} message={msg.data()} />
+          ))}
         <div ref={dummy}></div>
       </main>
 
